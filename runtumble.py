@@ -2,25 +2,16 @@
 import math
 import numpy
 import operator
+import random
 
-#INPUT VARIABLES
-SIZE=[1000,1000]
-START=[0,0]
-JACKPOTCENTER=[500,500] #x,y
-JACKPOTRADIUS=50
-AVGANGLE=68
-SRUN=30
-LRUN=100
-def makeangle(deg):
-	return float(deg) / 180 * math.pi
-	
 def tumble(AVGANGLE):
-	return numpy.random.normal(makeangle(AVGANGLE),math.pi)
+	RESULT=float(random.sample([-1,1],1)[0]) * float(numpy.random.rayleigh(numpy.radians(AVGANGLE) , math.pi)[0])#maybe use gamma dist?
+	return RESULT
 	
-def run(STARTPOS,RUNL,AVGANGLE):
-	ANGLE=tumble(AVGANGLE)
-	LENGTH=numpy.random.normal(RUNL,RUNL)
-	RUN=[LENGTH*math.sin(ANGLE),LENGTH*math.cos(ANGLE)]
+def run(STARTPOS,RUNL,ANGLE,SIZE):
+	LENGTH=numpy.random.triangular(0,0,RUNL)
+	#LENGTH=numpy.random.normal(RUNL,RUNL - 20)
+	RUN=[LENGTH * math.cos(ANGLE),LENGTH * math.sin(ANGLE)]
 	POS=map(operator.add,STARTPOS,RUN)
 	#for i in range (0,1):
 	#	if POS[i]<0:
@@ -42,11 +33,11 @@ def there(POS,JACKPOTCENTER,JACKPOTRADIUS):
 	POSDIFL=math.sqrt(POSDIF[0] ** 2 + POSDIF[1] ** 2)
 	return POSDIFL<=JACKPOTRADIUS
 
-def closer(POS,OLDPOS,JACKPOTCENTER,JACKPOTRADIUS):
+def closer(POS,OLDPOS,JACKPOTCENTER):
 	POSDIF=map(operator.sub,JACKPOTCENTER,POS)
-	POSDIFL=math.sqrt(POSDIF[0] ** 2 + POSDIF[1] ** 2)
+	POSDIFL=math.sqrt((POSDIF[0] ** 2) + (POSDIF[1] ** 2))
 	OLDPOSDIF=map(operator.sub,JACKPOTCENTER,OLDPOS)
-	OLDPOSDIFL=math.sqrt(OLDPOSDIF[0] ** 2 + OLDPOSDIF[1] ** 2)
+	OLDPOSDIFL=math.sqrt((OLDPOSDIF[0] ** 2) + (OLDPOSDIF[1] ** 2))
 	return POSDIFL<OLDPOSDIFL
 
 def errors(START,SIZE,JACKPOTCENTER,JACKPOTRADIUS):
@@ -57,9 +48,9 @@ def errors(START,SIZE,JACKPOTCENTER,JACKPOTRADIUS):
 def circle(JACKPOTCENTER,JACKPOTRADIUS):
 	CIRCLE=[[],[]]
 	for i in range (0,360):
-		CIRCANGLE=makeangle(i)
-		CIRCLE[0]=CIRCLE[0] + [JACKPOTCENTER[0] + (JACKPOTRADIUS * math.sin(CIRCANGLE))]
-		CIRCLE[1]=CIRCLE[1] + [JACKPOTCENTER[1] + (JACKPOTRADIUS * math.cos(CIRCANGLE))]
+		CIRCANGLE=numpy.radians(i)
+		CIRCLE[0]=CIRCLE[0] + [JACKPOTCENTER[0] + (JACKPOTRADIUS * math.cos(CIRCANGLE))]
+		CIRCLE[1]=CIRCLE[1] + [JACKPOTCENTER[1] + (JACKPOTRADIUS * math.sin(CIRCANGLE))]
 	return CIRCLE
 
 def getsteps():
